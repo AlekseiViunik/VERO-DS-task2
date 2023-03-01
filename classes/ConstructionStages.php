@@ -69,8 +69,8 @@ class ConstructionStages
 	}
 
 	// Add an update function
-	public function update($id, $data) 
-	{	
+	public function patch($id, $data)
+	{
 		// Create an array which binds names of parameters with the 'data' array's keys
 		$binds = array(
 			':name' => 'name',
@@ -114,13 +114,13 @@ class ConstructionStages
 		{
 			throw new Exception('There are no fields to update');
 		}
-		
+
 		// Upgrade our 'query' concatenating with 'fields'
 		$query .= implode(', ', $fields) . ' WHERE ID = :id';
 
 		// Create a PDO object '$stmt'
 		$stmt = $this->db->prepare($query);
-		$stmt->bindValue(':id', $id);
+		$stmt->bindValue(':id', $id, PDO::PARAM_INT);
 
 		// Run through the array and if the current array's key is in data, we bind it to the appropriate request parameter
 		foreach ($binds as $bind => $key)
@@ -153,5 +153,5 @@ class ConstructionStages
 
 		return $this->getSingle($id);
 	}
-	
+
 }
