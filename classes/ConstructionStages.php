@@ -67,4 +67,91 @@ class ConstructionStages
 		]);
 		return $this->getSingle($this->db->lastInsertId());
 	}
+
+	// Add an update function
+	public function update($id, $data) 
+	{	
+		// Create an array which binds names of parameters with the 'data' array's keys
+		$binds = array(
+			':name' => 'name',
+			':start_date' => 'startDate',
+			':end_date' => 'endDate',
+			':duration' => 'duration',
+			':durationUnit' => 'durationUnit',
+			':color' => 'color',
+			':externalId' => 'externalId',
+			':status' => 'status'
+		);
+
+		$binds_values = array_values($binds);
+
+		// Check if the response with given id exists
+		$this->getSingle($id); 
+		
+		// Prepare SQL query. Later we will concatenate $query and $fields in a SQL update request
+		$query = 'UPDATE construction_stages SET ';
+		$fields = array();
+
+		// Add to the $fields only those fields wich are in $data except 'status' data
+		foreach($data as $key => $value) 
+		{
+			if(in_array($key, $binds_values)) 
+			{
+				if ($key === 'status') 
+				{
+					$status = strtoupper($value);
+					if (!in_array($status, ['NEW', 'PLANNED', 'DELETED'])) 
+					{
+						throw new Exception('Invalid status');
+					}
+				}
+				$fields[] = $key . ' = :' . $key;
+			}
+		}
+		
+		// If there are no fields to update, then rise an Exception
+		if (empty($fields)) 
+		{
+			throw new Exception('There are no fields to update');
+		}
+		
+		// Upgrade our 'query' concatenating with 'fields'
+		$query .= implode(', ', $fields) . ' WHERE ID = :id';
+
+		// Create a PDO object '$stmt'
+		$stmt = $this->db->prepare($query);
+		$stmt->bindValue(':id', $id);
+
+		// Run through the array and if the current array's key is in data, we bind it to the appropriate request parameter
+		foreach ($binds as $bind => $key)
+		{
+			if (isset($data[$key]))
+			{
+				$stmt->bindValue($bind, $data[$key]);
+			}
+		}
+
+		// execute 'stmt' request
+		$stmt->execute();
+
+		return $this->getSingle($id);
+	}
+
+	// Add a delete function
+	public function delete($id)
+	{
+		$stmt = $this->db->prepare("
+			UPDATE construction_stages
+			SET status = :status
+			WHERE ID = :id
+		");
+
+		$stmt->execute([
+			'status' => 'DELETED',
+			'id' => $id
+		]);
+
+		return $this->getSingle($id);
+	}
+	
 }
