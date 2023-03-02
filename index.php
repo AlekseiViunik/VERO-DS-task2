@@ -55,7 +55,6 @@ class Api
 		];
 
 		if ($uri) {
-
 			foreach ($routes as $pattern => $target) 
 			{
 				$pattern = str_replace(array_keys($wildcards), array_values($wildcards), $pattern);
@@ -64,9 +63,13 @@ class Api
 					array_shift($matches);
 					if ($httpVerb === 'post' || $httpVerb === 'patch') {
 						$data = json_decode(file_get_contents('php://input'));
-						$params = [new $target['bodyType']($data)];
+						if ($httpVerb === 'patch') {
+						    $params[] = $data;
+						} else {
+						    $params = [new $target['bodyType']($data)];
+						}
 					}
-					$params = array_merge($params, $matches);
+					$params[] = (int) array_shift($matches);
 					$response = call_user_func_array([new $target['class'], $target['method']], $params);
 					break;
 				}

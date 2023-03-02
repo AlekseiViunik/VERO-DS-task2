@@ -69,8 +69,12 @@ class ConstructionStages
 	}
 
 	// Add an update function
-	public function patch($id, $data)
+	public function patch($data, $id)
 	{
+		$id = intval($id);
+		$data = get_object_vars($data);
+		
+		
 		// Create an array which binds names of parameters with the 'data' array's keys
 		$binds = array(
 			':name' => 'name',
