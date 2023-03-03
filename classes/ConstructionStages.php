@@ -5,7 +5,7 @@ class ConstructionStages
 	private $db;
 	
 	// Function which validates the data
-	private function validateField($fieldName, $fieldValue)
+	private function validateField($fieldName, $fieldValue, $startDate=null)
     	{
             switch ($fieldName) {
                 
@@ -16,19 +16,19 @@ class ConstructionStages
                     }
                     break;
                     
-                case 'start_date':
+                case 'startDate':
 		    if (!preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/', $fieldValue)) {
     			throw new Exception('Invalid date format. Use ISO format, e.g. 2022-12-31T14:59:00Z');
 		    }
 		    break;
                     
-                case 'end_date':
+                case 'endDate':
                     if (!is_null($fieldValue)) {
                         $timestamp = strtotime($fieldValue);
                         if ($timestamp === false) {
                             throw new Exception('Invalid end_date format. Use ISO format, e.g. 2022-12-31T14:59:00Z');
                         }
-                        $startTimestamp = strtotime($this->startDate);
+                        $startTimestamp = strtotime($startDate);
                         if ($startTimestamp === false) {
                             throw new Exception('Invalid start date format. Use ISO format, e.g. 2022-12-31T14:59:00Z');
                         }
@@ -53,7 +53,7 @@ class ConstructionStages
                     break;
                     
                 case 'externalId':
-                    if (!is_null($fieldValue) && strlen($fieldValue) > 255) {
+                    if (!is_null($fieldValue) && strlen($fieldValue) > 5) {
                         throw new Exception('External ID is too long');
                     }
                     break;
@@ -112,8 +112,10 @@ class ConstructionStages
 
 	public function post(ConstructionStagesCreate $data)
 	{
+		$startDate = $data->startDate;
+	        var_dump($startDate);
 	        foreach ($data as $fieldName => $fieldValue) {
-            	    $this->validateField($fieldName, $fieldValue);
+            	    $this->validateField($fieldName, $fieldValue, $startDate);
                 }
 	
 		$stmt = $this->db->prepare("
