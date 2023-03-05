@@ -50,6 +50,10 @@ class ConstructionStages
 
 	public function post(ConstructionStagesCreate $data)
 	{
+	
+		// Call calcDuration function to calculate duration field (if endDate is null, then duration is also null).
+	    $data->duration = $this->calcDuration($data->startDate, $data->endDate, $data->durationUnit);
+	    
 		// Validate input data
 		ConstructionStagesValidator::validateName($data->name);
 		ConstructionStagesValidator::validateStartDate($data->startDate);
@@ -83,6 +87,32 @@ class ConstructionStages
 		$id = intval($id);
 		$data = get_object_vars($data);
 		
+		// Call calcDuration function to calculate duration field (if endDate is null, then duration is also null).
+		// First of all we have to check if there are necessary fields in $data. If it's false, we take it from object.
+		if (isset($data['startDate'])) {
+			$start = $data['startDate'];
+		} else {
+		    $start = $this->getSingle($id)['start_date'];
+		}
+		
+		if (isset($data['endDate'])) {
+			$end = $data['endDate'];
+			if ($end === null) {
+        		$duration = null;
+    		}
+
+		} else {
+		    $end = $this->getSingle($id)['end_date'];
+		}
+		
+		if (isset($data['durationUnit'])) {
+			$unit = $data['durationUnit'];
+		} else {
+		    $unit = $this->getSingle($id)['durationUnit'];
+		}
+		
+		$duration = $this->calcDuration($start, $end, $unit);
+		
     	// Build the SQL query
     	$query = 'UPDATE construction_stages SET ';	
     		
@@ -98,17 +128,16 @@ class ConstructionStages
         	$fields[] = $key . ' = :' . $key;
         	$values[$key] = $value;
     	}
-        /*
-        "id": 117,
-        "name": "abcdef",
-        "startDate": "2024-09-10T00:10:00Z",
-        "endDate": "2026-09-10T00:10:00Z",
-        "durationUnit": "HOURS",
-        "color": "#FFFFFF",
-        "externalId": "54321",
-        "status": "NEW"   
-        */ 	
-        var_dump($data);
+    	
+    	if ($duration !== $this->getSingle($id)['duration']) {
+    		$fields[] = 'duration = :duration';
+    		$values['duration'] = $duration;
+		} elseif ($duration === null && !in_array('duration = :duration', $fields)) {
+    		$fields[] = 'duration = :duration';
+    		$values['duration'] = null;
+		}
+    	
+    	// Validate data to update
 		foreach ($data as $key => $value) {
     		switch ($key) {
         		case 'name':
@@ -137,7 +166,7 @@ class ConstructionStages
             		break;
     		}
 		}
-
+		
     	// If there are no fields to update, then rise an Exception
     	if (empty($fields)) {
         	throw new Exception('There are no fields to update');
@@ -179,5 +208,36 @@ class ConstructionStages
 		]);
 
 		return $this->getSingle($id);
+	}
+	
+	// Add a func which counts duration using start_date, end_date and durationUnit values
+	public function calcDuration($start_date, $end_date, $unit) {
+		if (!$start_date) {
+			return null;
+		}
+		
+		$start = new DateTime($start_date);
+		if ($end_date) {
+			$end = new DateTime($end_date);
+			$difference = $start->diff($end);
+			
+			switch ($unit) {
+				case "HOURS":
+					$duration = $difference->h + $difference->days * 24;
+					break;
+					
+				case "DAYS":
+					$duration = $difference->days;
+					break;
+				
+				// There is no current accuracy for "WEEKS" value in task 3
+				case "WEEKS":
+				    $duration = $difference->days / 7;
+				    break;
+			}
+		} else {
+			$duration = null;
+		}
+		return $duration;
 	}
 }

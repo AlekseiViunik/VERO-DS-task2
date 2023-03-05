@@ -5,7 +5,7 @@ class ConstructionStagesValidator
 {
     public static function validateName($name)
     {
-        if (strlen($name) > 5) {
+        if (strlen($name) > 8) {
             throw new Exception('Name is too long');
         }
     }
@@ -51,7 +51,7 @@ class ConstructionStagesValidator
 
     public static function validateExternalId($externalId)
     {
-        if (!empty($externalId) && strlen($externalId) > 5) {
+        if (!empty($externalId) && strlen($externalId) > 8) {
             throw new Exception('External ID is too long');
         }
     }
