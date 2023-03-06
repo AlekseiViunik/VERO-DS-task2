@@ -81,7 +81,16 @@ class ConstructionStages
 		return $this->getSingle($this->db->lastInsertId());
 	}
 
-	// Add an update function
+    /**
+    * Sends a validated request to update a specific construction stage with new data in database.
+    *
+    * @param object $data Object with data to update.
+    * @param string $id The identifier of the record that has to be updated.
+    *
+    * @return array Data array of updated construction stage
+    * 
+    * @throws Exception if there are no fields to update.
+    */
 	public function patch($data, $id)
 	{
 		$id = intval($id);
@@ -100,7 +109,6 @@ class ConstructionStages
 			if ($end === null) {
         		$duration = null;
     		}
-
 		} else {
 		    $end = $this->getSingle($id)['end_date'];
 		}
@@ -111,6 +119,7 @@ class ConstructionStages
 		    $unit = $this->getSingle($id)['durationUnit'];
 		}
 		
+		// Then we call the calculation function.
 		$duration = $this->calcDuration($start, $end, $unit);
 		
     	// Build the SQL query
@@ -167,33 +176,39 @@ class ConstructionStages
     		}
 		}
 		
-    	// If there are no fields to update, then rise an Exception
+    	// If there are no fields to update, then rise an Exception.
     	if (empty($fields)) {
         	throw new Exception('There are no fields to update');
     	}    	
     	
-    	// Concatenate $query and $fields in a SQL update request
+    	// Concatenate $query and $fields in a SQL update request.
     	$query .= implode(', ', $fields) . ' WHERE ID = :id';
 
-    	// Add the ID value to $values
+    	// Add the ID value to $values.
     	$values['id'] = $id;
 
-    	// Prepare the SQL query
+    	// Prepare the SQL query.
     	$stmt = $this->db->prepare($query);
 
-    	// Bind values to the query
+    	// Bind values to the query.
     	foreach ($values as $key => $value) {
         	$stmt->bindValue(':' . $key, $value);
     	}
 
-    	// Execute the query
+    	// Execute the query.
     	$stmt->execute();
     	
-    	// Return the updated record
+    	// Return the updated record.
 		return $this->getSingle($id);
 	}
 
-	// Add a delete function
+    /**
+    * Sends a request to update a specific construction stage with "DELETED" status to database.
+    *
+    * @param string $id The identifier of the record that has to be updated.
+    *
+    * @return array Data array of updated construction stage
+    */
 	public function delete($id)
 	{
 		$stmt = $this->db->prepare("
@@ -210,8 +225,17 @@ class ConstructionStages
 		return $this->getSingle($id);
 	}
 	
-	// Add a func which counts duration using start_date, end_date and durationUnit values
+    /**
+    * Calculates duration between given startDate and endDate which depends on .
+    *
+    * @param string $start_date The date of the construction stage begining.
+    * @param string $end_date The date of the construction stage ending.
+    * @param string $unit Temporal unit in which the time difference will be calculated.    
+    *
+    * @return float $duration result of calculation in given units.
+    */
 	public function calcDuration($start_date, $end_date, $unit) {
+
 		if (!$start_date) {
 			return null;
 		}
