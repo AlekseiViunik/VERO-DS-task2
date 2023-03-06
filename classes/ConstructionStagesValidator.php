@@ -1,7 +1,7 @@
 <?php
 
 /**
-* A class to incoming data validation.
+* A class to incoming data validation for post and patch methods.
 */
 
 class ConstructionStagesValidator
@@ -23,7 +23,7 @@ class ConstructionStagesValidator
     /**
     * Validates the format of the startDate field.
     *
-    * @param string $startDate Date of the construction stage's begining.
+    * @param string $startDate Date of the construction stage begining.
     * 
     * @throws Exception If the format of the startDate is incorrect.
     */
@@ -37,8 +37,8 @@ class ConstructionStagesValidator
 	/**
     * Validates the format of the endDate field.
     *
-    * @param string $endDate Date of the construction stage's ending.
-    * @param string $startDate Date of the construction stage's begining.
+    * @param string $endDate Date of the construction stage ending.
+    * @param string $startDate Date of the construction stage begining.
     * 
     * @throws Exception If the format of the endDate is not null or incorrect.
     * @throws Exception If endDate is earlier than startDate.
@@ -106,7 +106,7 @@ class ConstructionStagesValidator
 	/**
     * Validates the type of the status.
     *
-    * @param string $status Current construction stage's status.
+    * @param string $status Current construction stage status.
     * 
     * @throws Exception If the given status is not in the allowed-statuses list.
     */

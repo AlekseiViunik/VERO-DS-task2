@@ -95,32 +95,35 @@ class ConstructionStages
 	{
 		$id = intval($id);
 		$data = get_object_vars($data);
-		
+
 		// Call calcDuration function to calculate duration field (if endDate is null, then duration is also null).
 		// First of all we have to check if there are necessary fields in $data. If it's false, we take it from object.
 		if (isset($data['startDate'])) {
 			$start = $data['startDate'];
 		} else {
-		    $start = $this->getSingle($id)['start_date'];
-		}
-		
-		if (isset($data['endDate'])) {
-			$end = $data['endDate'];
-			if ($end === null) {
-        		$duration = null;
-    		}
-		} else {
-		    $end = $this->getSingle($id)['end_date'];
+		    $start = $this->getSingle($id)[0]['startDate'];
 		}
 		
 		if (isset($data['durationUnit'])) {
 			$unit = $data['durationUnit'];
 		} else {
-		    $unit = $this->getSingle($id)['durationUnit'];
+		    $unit = $this->getSingle($id)[0]['durationUnit'];
 		}
 		
-		// Then we call the calculation function.
-		$duration = $this->calcDuration($start, $end, $unit);
+		// We use here array_key_exists because giving "endDate: null" is the same as not giving endDate at all.
+		// And we need to separate this meanings
+		if (array_key_exists('endDate', $data)) {
+			$end = $data['endDate'];
+			if ($end === null) {
+				$duration = null;
+			} else {
+				$duration = $this->calcDuration($start, $end, $unit);
+			}
+		} else {
+		    $end = $this->getSingle($id)[0]['endDate'];
+		    $duration = $this->calcDuration($start, $end, $unit);
+		}
+
 		
     	// Build the SQL query
     	$query = 'UPDATE construction_stages SET ';	
@@ -138,7 +141,7 @@ class ConstructionStages
         	$values[$key] = $value;
     	}
     	
-    	if ($duration !== $this->getSingle($id)['duration']) {
+    	if ($end !== null && $duration !== $this->getSingle($id)['duration']) {
     		$fields[] = 'duration = :duration';
     		$values['duration'] = $duration;
 		} elseif ($duration === null && !in_array('duration = :duration', $fields)) {
@@ -235,7 +238,7 @@ class ConstructionStages
     * @return float $duration result of calculation in given units.
     */
 	public function calcDuration($start_date, $end_date, $unit) {
-
+		
 		if (!$start_date) {
 			return null;
 		}

@@ -41,7 +41,6 @@ class Api
 			'patch constructionStages/(:num)' => [
 				'class' => 'ConstructionStages',
 				'method' => 'patch',
-				'bodyType' => 'ConstructionStagesCreate',
 			],
 			// Add delete method
 			'delete constructionStages/(:num)' =>[
