@@ -1,3 +1,21 @@
+#  VERO Digital Solutions task
+![PHP version](https://img.shields.io/badge/php-8.1-green)
+
+## Solution's description
+
+The task is below. Here is the solution:
+- We add 2 new routes in `routes` in `index.php` which are routes for patch and delete methods.
+- We add `patch` and `delete` methods for `ConstructionStages` class. The `patch` method allows us to modify the parameters of an existing ConstructionStage object. The `delete` method changes the status of an existing ConstructionStage object to "DELETED".
+- We create a php file with `ConstructionSagesValidator` class which validates every given field according to the task.
+- We invoke the validation class for the `patch` and `post` methods.
+- We add `calcDuration` method for `ConstructionStages` class and call it in `patch` and `post` methods. It calculates the difference between start date and end date in given `durationUnits`. It excludes minutes and seconds from calculation.
+- We set a default values for `durationUnit` and `status` fields in `post` method.
+- We add a `phpDoc` to every class and method <b><i><u>we created</u><i></b>.
+
+
+
+# Task
+
 Hello dear API creator!
 
 This repository is a playground for your submission.
