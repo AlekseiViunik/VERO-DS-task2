@@ -4,6 +4,7 @@
 ## Solution's description
 
 The task is below. Here is the solution:
+- We add a `.gitignore` file to our project, and specifying the name of our database in it, to avoid uploading an updated database to GitHub.
 - We add 2 new routes in `routes` in `index.php` which are routes for patch and delete methods.
 - We add `patch` and `delete` methods for `ConstructionStages` class. The `patch` method allows us to modify the parameters of an existing ConstructionStage object. The `delete` method changes the status of an existing ConstructionStage object to "DELETED".
 - We create a php file with `ConstructionSagesValidator` class which validates every given field according to the task.
