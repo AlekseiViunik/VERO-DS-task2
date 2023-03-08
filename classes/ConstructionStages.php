@@ -50,9 +50,18 @@ class ConstructionStages
 
 	public function post(ConstructionStagesCreate $data)
 	{
-	
+	    // Set default value for durationUnit if not explicitly set
+    	if (!$data->durationUnit) {
+        	$data->durationUnit = 'DAYS';
+    	}
+    	
+    	// Set default value for status if not explicitly set
+    	if (!$data->status) {
+        	$data->status = 'NEW';
+    	}
+    	
 		// Call calcDuration function to calculate duration field (if endDate is null, then duration is also null).
-	    $data->duration = $this->calcDuration($data->startDate, $data->endDate, $data->durationUnit);
+	    $data->duration = $this->calcDuration($data->startDate, $data->endDate, $data->durationUnit);	    
 	    
 		// Validate input data
 		ConstructionStagesValidator::validateName($data->name);
@@ -246,15 +255,22 @@ class ConstructionStages
 		$start = new DateTime($start_date);
 		if ($end_date) {
 			$end = new DateTime($end_date);
+			
+			// Set minutes and seconds to 0 to exclude them from the calculation
+			$start->setTime($start->format('H'), 0);
+			$end->setTime($end->format('H'), 0);
+			
+			// Find the difference
 			$difference = $start->diff($end);
 			
+			// Calculate the difference according to given durationUnit
 			switch ($unit) {
 				case "HOURS":
-					$duration = $difference->h + $difference->days * 24;
+					$duration = $difference->days * 24 + $difference->h;
 					break;
 					
 				case "DAYS":
-					$duration = $difference->days;
+					$duration = $difference->days + $difference->h / 24;
 					break;
 				
 				// There is no current accuracy for "WEEKS" value in task 3
