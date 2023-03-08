@@ -259,7 +259,7 @@ class ConstructionStages
 				
 				// There is no current accuracy for "WEEKS" value in task 3
 				case "WEEKS":
-				    $duration = $difference->days / 7;
+				    $duration = $difference->days / 7 + $difference->h/ 7 / 24;
 				    break;
 			}
 		} else {
